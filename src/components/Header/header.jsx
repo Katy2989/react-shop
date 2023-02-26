@@ -4,6 +4,7 @@ import React from 'react';
 import logo from "../Logo/logo.svg";
 // // import Search from "../Search/search";
 import s from "./style.module.css";
+import { Navigate, Route, Routes } from 'react-router-dom';
 // import cn from 'classnames';
 
 // import { ReactComponent as SearchIcon} from "../Search/ic-close-input.svg"; 
@@ -13,7 +14,7 @@ import Search from '../Search/search';
 
 
 
-function Header({ handleSubmit, onInput, user, onUpdateUser}) {
+function Header({children, onSubmit, onInput, user, onUpdateUser}) {
 
 const handleButtonEdit =(e)=>{
   e.preventDefault();
@@ -30,9 +31,9 @@ const handleButtonEdit =(e)=>{
         </div>
         <div className={s.headerWrapper}>
 
-          <a className={s.logo} title="Логотип">
+          <a className={s.logo} title="Логотип" href ="/">
             <img src={logo} alt=''/></a>   
-            <Search  onSubmit={handleSubmit} onInput={onInput} />
+            {children}
             </div>
        
     

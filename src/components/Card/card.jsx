@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ReactComponent as Save } from "./save.svg";
 import cn from 'classnames';
 
 import './style.css';
+import { Link } from "react-router-dom";
+import { UserContext } from "../../Untils/UserContext/userContext";
 
 const Card = ({ price,
   discount,
@@ -11,7 +13,7 @@ const Card = ({ price,
   wight,
   name,
   likes,
-  currentUser,
+  // currentUser,
   onProductLike,
 
   _id, }) => {
@@ -20,6 +22,7 @@ const Card = ({ price,
     onProductLike({ _id, likes });
   }
 
+  const currentUser = useContext(UserContext);
   const liked = likes.some((id) => id === currentUser?._id);
 
 
@@ -42,7 +45,7 @@ const Card = ({ price,
 
         </button>
       </div>
-      <a href="/product" className="card__link">
+      <Link to={`/product/${_id}`} className="card__link">
         <img src={pictures} alt="" className="card__image" />
         <div className="card__desc">
           <span className={!!discount ? "card__old-price" : "card__price"}>{price}&nbsp;P</span>
@@ -50,7 +53,7 @@ const Card = ({ price,
           <span className="card__wight">{wight}</span>
           <p className="card__name">{name}</p>
         </div>
-      </a>
+      </Link>
       <a href="#" className="card__cart btn btn_type_primary">
         В корзину</a>
     </div>

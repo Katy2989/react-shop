@@ -2,12 +2,17 @@ import React, { useEffect, useState } from 'react';
 import CardList from '../CardList/card-list';
 import Header from '../Header/header';
 import FooterPage from '../FooterPage/Footer';
-
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './style.css';
 // import data from "../../assets/data.json";
 import SearchInfo from '../SearchInfo/search-info';
 import api from '../../Untils/api';
-import useDebounce from "../../assets/Hooks/useDebounce";
+import useDebounce from "../../Untils/Hooks/useDebounce";
+import { CatalogPage } from '../../Pages/Product/Catalog';
+import { ProductPage } from '../../Pages/Product/Product';
+import { NoMatchFound } from '../../Pages/Product/NoMatchFound';
+import Search from '../Search/search';
+import { UserContext } from '../../Untils/UserContext/userContext';
 // import { Product } from '../../Pages/Product/product';
 
 function App() {
@@ -16,83 +21,106 @@ function App() {
    const [searchQuery, setSearchQuery] = useState("");
    const [currentUser, setCurrentUser] = useState(null);
    const [view, setView] = useState(false);
-    const debounceSearchQuery = useDebounce(searchQuery, 300);
+   const debounceSearchQuery = useDebounce(searchQuery, 300);
 
-   const handleInputChange = (inputValue)=>{
+   const handleInputChange = (inputValue) => {
       setSearchQuery(inputValue);
-     
+
    };
 
-   const handleSubmit=(e)=>{
+   const handleSubmit = (e) => {
       e.preventDefault();
       handleRequest();
    }
 
 
-   const handleRequest=()=>{
+   const handleRequest = () => {
       // const filteredCards = cards.filter((item)=>
       //    item.name.toUpperCase().includes(searchQuery.toUpperCase()));
       //    setCards([...filteredCards]);
-      api.search(searchQuery).then((res)=>setCards(res)).catch((err)=>console.log(err));
+      api.search(searchQuery).then((res) => setCards(res)).catch((err) => console.log(err));
    };
 
    useEffect(() => {
       Promise.all([api.getProductsList(), api.getUserInfo()]).then(
-        ([productsData, userData]) => {
-          setCards(productsData.products);
-          setCurrentUser(userData);
-        }
+         ([productsData, userData]) => {
+            setCards(productsData.products);
+            setCurrentUser(userData);
+         }
       );
-},[]
-);
+   }, []
+   );
 
-useEffect(()=>{
-   handleRequest();
-},[debounceSearchQuery]
-);
+   useEffect(() => {
+      handleRequest();
+   }, [debounceSearchQuery]
+   );
 
-function handleUpdateUser(dataUpdateUser){
+   console.log(cards);
+   function handleUpdateUser(dataUpdateUser) {
 
-   api.setUserInfo(dataUpdateUser).then((newUser)=>{
-   setCurrentUser(newUser);
-});
-}
+      api.setUserInfo(dataUpdateUser).then((newUser) => {
+         setCurrentUser(newUser);
+      });
+   }
 
-function handleProductLike(product){
-   console.log(product,"pr");
-   const liked = product.likes.some((id) => id === currentUser?._id);
-   api.changeLikeProduct(product._id, liked).then((newCard) => {
-     const newProducts = cards.map((cardState) => {
-       console.log('Карточка из стейта', cardState);
-       console.log('Карточка из сервера', newCard);
-       return cardState._id === newCard._id ? newCard : cardState;
-     });
-     setCards(newProducts);
-   });
-}
-
+   function handleProductLike(product) {
+      console.log(product, "pr");
+      const liked = product.likes.some((id) => id === currentUser?._id);
+      api.changeLikeProduct(product._id, liked).then((newCard) => {
+         const newProducts = cards.map((cardState) => {
+            console.log('Карточка из стейта', cardState);
+            console.log('Карточка из сервера', newCard);
+            return cardState._id === newCard._id ? newCard : cardState;
+         });
+         setCards(newProducts);
+      });
+   }
 
    return (
       <>
+         <UserContext.Provider value={currentUser}>
+            <Header onSubmit={handleSubmit} onInput={handleInputChange} user={currentUser} onUpdateUser={handleUpdateUser}>
+               <Search onSubmit={handleSubmit} onInput={handleInputChange} />
+            </Header>
 
-         <Header onSubmit={handleSubmit} onInput={handleInputChange}  user ={currentUser} onUpdateUser ={handleUpdateUser}/>
-         <main className='content container'>
-            <SearchInfo searchText={searchQuery} searchCount={cards.length}/>
-            {/* <button className='btn' onClick={()=>setView(state=>!state)}>Change view</button> */}
-            {/* {view ?( */}
-            <div className='content__cards'>
-            <CardList goods={cards}
+            <main className='content container'>
+               <SearchInfo searchText={searchQuery} searchCount={cards.length} />
+               {/* <button className='btn' onClick={()=>setView(state=>!state)}>Change view</button> */}
+               {/* {view ?( */}
+               {/* <div className='content__cards'> */}
+               {/* <CardList goods={cards}
              currentUser={currentUser}
              onProductLike={handleProductLike}
-         />
-         
-            </div>
-            {/* ): */}
-            {/* //  (<Product/>)
-            // } */}
-         </main>
-         <FooterPage />
+         /> */}
 
+               {/* </div> */}
+
+               <Routes>
+                  <Route
+                     path='/'
+                     element={<CatalogPage handleProductLike={handleProductLike} goods={cards} currentUser={currentUser} />}
+                  ></Route>
+                  <Route
+                     path='/product/:productId'
+                     element={<ProductPage />}
+                  ></Route>
+                  <Route
+                     path='/custom'
+                     element={<div>MY CUSTOM COMPONENT</div>}
+                  ></Route>
+                  <Route
+                     path='/custom2'
+                     element={<h1>MY NEW COMPONENT</h1>}
+                  ></Route>
+                  <Route path='*' element={<NoMatchFound />}></Route>
+               </Routes>
+               {/* ): */}
+               {/* //  (<Product/>)
+            // } */}
+            </main>
+            <FooterPage />
+         </UserContext.Provider>
       </>
 
    );

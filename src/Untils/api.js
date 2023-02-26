@@ -47,7 +47,13 @@ class Api {
 
         }
 
+        getProductById(idProduct) {
+          return fetch(`${this._baseUrl}/products/${idProduct}`, {
+              headers: this._headers
+          }).then(onResponse);
       }
+      }
+      
  
 
 const config ={

@@ -1,132 +1,85 @@
-// import cn from 'classnames';
-// import React from 'react';
-// import s from './style.module.css';
-// import { ReactComponent as Save } from './img/save.svg';
-// import truck from './img/truck.svg';
-// import quality from './img/quality.svg';
-// import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
-// import { useEffect } from 'react';
+import React, { useState } from 'react';
+import { useCallback } from 'react';
+// import { useContext } from 'react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
-// export const Product = ({
-//   pictures,
-//   name,
-//   price,
-//   discount,
-//   onProductLike,
-//   likes = [],
-//   currentUser,
-//   description,
-// }) => {
-//   const discount_price = Math.round(price - (price * discount) / 100);
-//   const isLike = likes.some((id) => id === currentUser?._id);
-//   const desctiptionHTML = { __html: description };
+import Header from '../../components/Header/header';
+import Logo from '../../components/Logo/logo';
+import { Product } from '../../components/Product/product';
+import Search from '../../components/Search/search';
+import Spinner from '../../components/Spinner/spinner';
+import api from '../../Untils/api';
 
-//   let navigate = useNavigate();
+// import { UserContext } from '../../context/userContext';
 
 
-//   const handleClick = () => {
-//     navigate('/');
-//   };
 
-//   const location = useLocation();
-//   console.log({ location });
+// const productId = '622c77e877d63f6e70967d22';
 
-//   useEffect(()=>{
-//     if (location.search.includes('name=dear')) {
-//       navigate('/');
-//     }
-//   }, [location.search]);
+export const ProductPage = () => {
+  const [cards, setCards] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [product, setProduct] = useState(null);
+
+//   const { handleProductLike } = useContext(UserContext);
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleRequest();
+  };
+
+  const handleInputChange = (inputValue) => {
+    setSearchQuery(inputValue);
+  };
+
+  const handleRequest = () => {
+    // const filterCards = cards.filter((item) =>
+    //   item.name.toUpperCase().includes(searchQuery.toUpperCase())
+    // );
+    // setCards(filterCards);
+
+    api
+      .search(searchQuery)
+      .then((res) => setCards(res))
+      .catch((err) => console.log(err));
+  };
+  // const onProductLike = () => {
+  //   console.log();
+  //   handleProductLike(product);
+  // };
+
+   const { productId } = useParams();
+
+//   console.log(productId);
+
+  useEffect(() => {
+    setIsLoading(true);
+    api.getUserInfo().then((userData) => setCurrentUser(userData));
+    api
+      .getProductById(productId)
+      .then((productData) => setProduct(productData))
+      .catch((err) => console.log('err', err))
+      .finally(() => setIsLoading(false));
+  }, [productId]);
 
 
-//   return (
-//     <>
-//       <div>
-//         <button onClick={handleClick} className='btn'>
-//           Назад
-//         </button>
-//         <h1 className={s.productTitle}>{name}</h1>
-//         <div>
-//           <span> Артикул : </span> <b>238907</b>
-//         </div>
-//       </div>
-//       <div className={s.product}>
-//         <div className={s.imgWrapper}>
-//           <img src={pictures} alt={`Изображение ${name}`} />
-//         </div>
-//         <div className={s.desc}>
-//           <span className={discount ? s.oldPrice : s.price}>
-//             {price}&nbsp;₽
-//           </span>
-//           {discount && (
-//             <span className={cn(s.price, 'card__price_type_discount')}>
-//               {discount_price}&nbsp;₽
-//             </span>
-//           )}
-//           <div className={s.btnWrap}>
-//             <div className={s.left}>
-//               <button className={s.minus}>-</button>
-//               <span className={s.num}>0</span>
-//               <button className={s.plus}>+</button>
-//             </div>
-//             <a href='/#' className={cn('btn', 'btn_type_primary', s.cart)}>
-//               В корзину
-//             </a>
-//           </div>
-//           <button
-//             className={cn(s.favorite, { [s.favoriteActive]: isLike })}
-//             onClick={onProductLike}
-//           >
-//             <Save />
-//             <span>{isLike ? 'В избранном' : 'В избранное'}</span>
-//           </button>
-//           <div className={s.delivery}>
-//             <img src={truck} alt='truck' />
-//             <div className={s.right}>
-//               <h3 className={s.name}>Доставка по всему Миру!</h3>
-//               <p className={s.text}>
-//                 Доставка курьером — <span className={s.bold}>от 399 ₽</span>
-//               </p>
-//             </div>
-//           </div>
-//           <div className={s.delivery}>
-//             <img src={quality} alt='quality' />
-//             <div className={s.right}>
-//               <h3 className={s.name}>Доставка по всему Миру!</h3>
-//               <p className={s.text}>
-//                 Доставка курьером — <span className={s.bold}>от 399 ₽</span>
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//       <div className={s.box}>
-//         <h2 className={s.title}>Описание</h2>
-//         <p className={s.subtitle} dangerouslySetInnerHTML={desctiptionHTML}></p>
-//         <h2 className={s.title}>Характеристики</h2>
-//         <div className={s.grid}>
-//           <div className={s.naming}>Вес</div>
-//           <div className={s.description}>1 шт 120-200 грамм</div>
-//           <div className={s.naming}>Цена</div>
-//           <div className={s.description}>490 ₽ за 100 грамм</div>
-//           <div className={s.naming}>Польза</div>
-//           <div className={s.description}>
-//             <p>
-//               Большое содержание аминокислот и микроэлементов оказывает
-//               положительное воздействие на общий обмен веществ собаки.
-//             </p>
-//             <p>Способствуют укреплению десен и жевательных мышц.</p>
-//             <p>
-//               Развивают зубочелюстной аппарат, отвлекают собаку во время смены
-//               зубов.
-//             </p>
-//             <p>
-//               Имеет цельную волокнистую структуру, при разжевывание получается
-//               эффект зубной щетки, лучше всего очищает клыки собак.
-//             </p>
-//             <p>Следует учесть высокую калорийность продукта.</p>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
+
+  return (
+    <>
+      <div className='content__cards'>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <Product
+            {...product}
+            // currentUser={currentUser}
+            //  onProductLike={onProductLike}
+          />
+        )}
+      </div>
+    </>
+  );
+};

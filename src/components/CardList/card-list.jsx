@@ -2,7 +2,7 @@ import "./style.css";
 import Card from "../Card/card";
 // import data from "../../assets/data.json";
 
-const CardList = ({ goods, currentUser, onProductLike})=>{
+const CardList = ({ goods, onProductLike})=>{
     
   
     return(
@@ -12,7 +12,7 @@ const CardList = ({ goods, currentUser, onProductLike})=>{
         <Card
           key={item._id}
           {...item}
-          currentUser={currentUser}
+         //  currentUser={currentUser}
           onProductLike={onProductLike}
            />
           ))}
