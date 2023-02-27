@@ -1,15 +1,17 @@
 
 // //  eslint-disable-next-line no-unused-vars
-import React from 'react';
+import React, { useContext } from 'react';
 import logo from "../Logo/logo.svg";
 // // import Search from "../Search/search";
 import s from "./style.module.css";
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { ReactComponent as FavIcon } from './img/fav.svg';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 // import cn from 'classnames';
 
 // import { ReactComponent as SearchIcon} from "../Search/ic-close-input.svg"; 
 // import CloseIcon from "../Search/ic-search.svg"; 
 import Search from '../Search/search';
+import { CardContext } from '../../Untils/cardContext/cardContext';
 
 
 
@@ -20,6 +22,8 @@ const handleButtonEdit =(e)=>{
   e.preventDefault();
   onUpdateUser({about:"Ментор", name:"Арсений"});
 };
+
+const { favorites } = useContext(CardContext);
 
   return (
     <header className={s.header}>
@@ -34,6 +38,13 @@ const handleButtonEdit =(e)=>{
           <a className={s.logo} title="Логотип" href ="/">
             <img src={logo} alt=''/></a>   
             {children}
+
+            <Link className={s.favoritesLink} to={'/favorites'}>
+              <FavIcon />
+              {favorites.length !== 0 && (
+                <span className={s.iconBubble}>{favorites.length}</span>
+              )}
+            </Link>
             </div>
        
     

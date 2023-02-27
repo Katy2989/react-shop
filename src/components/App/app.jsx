@@ -8,11 +8,15 @@ import './style.css';
 import SearchInfo from '../SearchInfo/search-info';
 import api from '../../Untils/api';
 import useDebounce from "../../Untils/Hooks/useDebounce";
-import { CatalogPage } from '../../Pages/Product/Catalog';
+import { CatalogPage } from '../../Pages/Catalog/Catalog';
 import { ProductPage } from '../../Pages/Product/Product';
-import { NoMatchFound } from '../../Pages/Product/NoMatchFound';
+import { NoMatchFound } from '../../Pages/NoMatchFound/NoMatchFound';
 import Search from '../Search/search';
 import { UserContext } from '../../Untils/UserContext/userContext';
+import { isLiked } from '../../Untils/utils';
+import { CardContext } from '../../Untils/cardContext/cardContext';
+import { Favorite } from '../../Pages/Favorite/Favorite';
+import { FaqPage } from '../../Pages/FAQ/FAQ';
 // import { Product } from '../../Pages/Product/product';
 
 function App() {
@@ -22,6 +26,7 @@ function App() {
    const [currentUser, setCurrentUser] = useState(null);
    const [view, setView] = useState(false);
    const debounceSearchQuery = useDebounce(searchQuery, 300);
+   const [favorites, setFavorites] = useState([]);
 
    const handleInputChange = (inputValue) => {
       setSearchQuery(inputValue);
@@ -46,6 +51,9 @@ function App() {
          ([productsData, userData]) => {
             setCards(productsData.products);
             setCurrentUser(userData);
+            const favProducts = productsData.products.filter((product) =>
+            isLiked(product.likes, userData._id));
+            setFavorites(favProducts);
          }
       );
    }, []
@@ -73,12 +81,31 @@ function App() {
             console.log('Карточка из сервера', newCard);
             return cardState._id === newCard._id ? newCard : cardState;
          });
+
+         if (!liked) {
+            setFavorites((prevState) => [...prevState, newCard]);
+          } else
+            setFavorites((prevState) =>
+              prevState.filter((card) => card._id !== newCard._id)
+            );
          setCards(newProducts);
       });
    }
 
+   const valueProvider = {
+      cards,
+      favorites,
+      handleProductLike: handleProductLike,
+    };
+
+    const userProvider = {
+      currentUser: currentUser,
+   
+    };
+
    return (
       <>
+         <CardContext.Provider value={valueProvider}>
          <UserContext.Provider value={currentUser}>
             <Header onSubmit={handleSubmit} onInput={handleInputChange} user={currentUser} onUpdateUser={handleUpdateUser}>
                <Search onSubmit={handleSubmit} onInput={handleInputChange} />
@@ -113,6 +140,8 @@ function App() {
                      path='/custom2'
                      element={<h1>MY NEW COMPONENT</h1>}
                   ></Route>
+                <Route path='/faq' element={<FaqPage />}></Route>
+                <Route path='/favorites' element={<Favorite />}></Route>
                   <Route path='*' element={<NoMatchFound />}></Route>
                </Routes>
                {/* ): */}
@@ -121,6 +150,7 @@ function App() {
             </main>
             <FooterPage />
          </UserContext.Provider>
+         </CardContext.Provider>
       </>
 
    );

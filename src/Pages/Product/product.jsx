@@ -75,7 +75,7 @@ export const ProductPage = () => {
         ) : (
           <Product
             {...product}
-            // currentUser={currentUser}
+             currentUser={currentUser}
             //  onProductLike={onProductLike}
           />
         )}

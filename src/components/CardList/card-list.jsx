@@ -2,7 +2,7 @@ import "./style.css";
 import Card from "../Card/card";
 // import data from "../../assets/data.json";
 
-const CardList = ({ goods, onProductLike})=>{
+const CardList = ({ goods =[], onProductLike})=>{
     
   
     return(
@@ -12,8 +12,8 @@ const CardList = ({ goods, onProductLike})=>{
         <Card
           key={item._id}
           {...item}
-         //  currentUser={currentUser}
-          onProductLike={onProductLike}
+         //   currentUser={currentUser}
+         onProductLike={onProductLike}
            />
           ))}
        </div>
