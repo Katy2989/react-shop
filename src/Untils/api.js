@@ -52,6 +52,12 @@ class Api {
               headers: this._headers
           }).then(onResponse);
       }
+
+      getUsers() {
+        return fetch(`${this._baseUrl}/v2/group-9/users`, {
+          headers: this._headers,
+        }).then(onResponse);
+      }
       }
       
  

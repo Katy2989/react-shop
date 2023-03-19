@@ -1,12 +1,14 @@
 import cn from 'classnames';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import s from './style.module.css';
 import { ReactComponent as Save } from './img/save.svg';
 import truck from './img/truck.svg';
 import quality from './img/quality.svg';
 import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Rating } from '../Rating/rating';
 import { UserContext } from '../../Untils/UserContext/userContext';
+import api from '../../Untils/api';
 
 export const Product = ({
   pictures,
@@ -17,10 +19,14 @@ export const Product = ({
   likes = [],
    currentUser,
   description,
+  reviews,
 }) => {
   const discount_price = Math.round(price - (price * discount) / 100);
   const isLike = likes.some((id) => id === currentUser?._id);
   const desctiptionHTML = { __html: description };
+
+  const [isClicked, setClicked] = useState(isLike);
+  const [users, setUsers] = useState([]);
 
   let navigate = useNavigate();
 
@@ -37,7 +43,26 @@ export const Product = ({
     }
   }, [location.search]);
 
-  
+  const onLike = (e) => {
+    onProductLike(e);
+    setClicked((state) => !state);
+  };
+
+  useEffect(() => {
+    api.getUsers().then((data) => setUsers(data));
+  }, []);
+
+  const getUser = (id) => {
+    if (!users.length) return 'User';
+    const user = users.find((el) => el._id === id);
+    return user?.name ?? 'User';
+  };
+
+  const options = {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  };
 
   return (
     <>
@@ -46,8 +71,11 @@ export const Product = ({
           Назад
         </button>
         <h1 className={s.productTitle}>{name}</h1>
+        <div className={s.rateInfo}></div>
         <div>
           <span> Артикул : </span> <b>238907</b>
+          <Rating isEditable={true} rating={5} />
+          <span className={s.reviewsCount}>{reviews?.length} отзывов</span>
         </div>
       </div>
       <div className={s.product}>
@@ -128,6 +156,29 @@ export const Product = ({
           </div>
         </div>
       </div>
+      <div className={s.reviews}>
+        <div className={s.reviews__control}>
+          <span className={s.reviews__title}>Отзывы</span>
+          <button className={s.reviews__btn}>Написать отзыв</button>
+        </div>
+        {reviews?.map((e) => (
+          <div className={s.review}>
+            <div className={s.review__author}>
+              <div>
+                <span>{getUser(e.author)} </span>
+                <span className={s.review__date}>
+                  {new Date(e.created_at).toLocaleString('ru', options)}
+                </span>
+              </div>
+              <Rating rating={e.rating} />
+            </div>
+            <div className={s.text}>
+              <span>{e.text}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </>
+  
   );
 };
